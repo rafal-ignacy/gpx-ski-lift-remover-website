@@ -1,0 +1,21 @@
+.custom-background {
+  background-color: rgba(82, 82, 82, 0.7);
+}
+
+.custom-background {
+  position: relative;
+  overflow: hidden;
+}
+
+.max-h-96 {
+  max-height: 24rem; /* 384px */
+  overflow-y: auto;
+}
+
+.strava-button {
+  background-color: #fc4c02;
+}
+
+.strava-button:hover {
+  background-color: #c93a02;
+}
