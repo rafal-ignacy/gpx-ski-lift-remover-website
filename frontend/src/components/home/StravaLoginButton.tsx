@@ -12,7 +12,8 @@ function StravaAuthButton() {
   return (
     <button className="strava-button mt-4 bg-zinc-700 text-white px-4 py-2 rounded-lg mr-4 hover:cursor-pointer"
       onClick={handleStravaAuth}>
-      Login to Strava
+      <span className="block font-semibold">Login to Strava</span>
+      <span className="block text-xs mt-1 text-gray-300">select file from your activity</span>
     </button>
   );
 };

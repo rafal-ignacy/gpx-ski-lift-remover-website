@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoonLoader } from "react-spinners";
-import BackgroundVideo from "../components/backgroundVideo";
+import BackgroundVideo from "../components/BackgroundVideo";
 import ActivityTable from "../components/strava-activity-select/ActivityTable";
 import SuccessIndicator from "../components/strava-activity-select/SuccessIndicator";
 import FailureIndicator from "../components/strava-activity-select/FailureIndicator";
@@ -72,33 +72,50 @@ function StravaActivitySelect() {
 
   const handleConfirmButtonClick = async () => {
     setDownloadingGpxInProgress(true);
-    fetch(`http://localhost:8000/strava/activities/${selectedActivityId}/gpx`, {
-      method: "GET",
-      credentials: "include",
-      timeout: 10,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          setDownloadGpxError(true);
-          return response.json().then((errorData) => {
-            throw new Error(errorData.detail || "Failed to download GPX");
-          });
+    try {
+      const response = await fetch(
+        `http://localhost:8000/strava/activities/${selectedActivityId}/gpx`,
+        {
+          method: "GET",
+          credentials: "include",
         }
-        setDownloadingGpxInProgress(false);
-        setDownloadGpxSuccess(true);
-        return response.json();
-      })
-      .then((data) => {
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
-      })
-      .catch((error) => {
-        setDownloadGpxError(true);
-        setDownloadingGpxInProgress(false);
-        console.error("Error:", error);
+      );
+  
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ detail: "Failed to download GPX" }));
+        throw new Error(errorData.detail);
+      }
+  
+      const gpxContent = await response.text();
+      const blob = new Blob([gpxContent], { type: "application/gpx+xml" });
+      const gpxFile = new File([blob], `activity_${selectedActivityId}.gpx`, {
+        type: "application/gpx+xml",
       });
+  
+      setDownloadGpxSuccess(true);
+      
+      setTimeout(() => {
+        navigate("/dashboard", {
+          state: {
+            gpxData: {
+              file: gpxFile,
+              content: gpxContent,
+              activityId: selectedActivityId,
+            },
+          },
+        });
+      }, 2000);
+  
+    } catch (error) {
+      setDownloadGpxError(true);
+      console.error("Error:", error);
+    } finally {
+      setDownloadingGpxInProgress(false);
+    }
   };
+  
 
   return (
     <div className="relative h-screen w-full">
@@ -151,7 +168,7 @@ function StravaActivitySelect() {
           ) : activities.length === 0 ? (
             <Loader text="Loading your activities" />
           ) : downloadingGpxInProgress ? (
-            <Loader text="Loading GPX file from your selected activity" />
+            <Loader text="Downloading GPX file from your selected activity" />
           ) : downloadGpxSuccess && !downloadGpxError ? (
             <SuccessIndicator text="GPX file downloaded successfully" />
           ) : downloadGpxError && !downloadGpxSuccess ? (

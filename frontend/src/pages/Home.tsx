@@ -1,4 +1,4 @@
-import BackgroundVideo from "../assets/background.mp4";
+import BackgroundVideo from "../components/BackgroundVideo";
 import StravaAuthButton from "../components/home/StravaLoginButton";
 import UploadGpxButton from "../components/home/UploadGpxButton";
 import "../styles/Home.css";
